@@ -2,7 +2,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import serializers
-from pytz import timezone
+from pytz import timezone as pytz_timezone
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,18 +18,19 @@ class ClassTypeSerializer(serializers.ModelSerializer):
 
 class FitnessClassSerializer(serializers.ModelSerializer):
     class_name = serializers.CharField(source='class_type.class_name', read_only=True)
-    start_time = serializers.SerializerMethodField()
-    end_time = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = FitnessClass
-        fields = ['id', 'class_type', 'class_name', 'instructor', 'start_time', 'end_time', 'available_slots']
+        fields = ['id', 'class_type', 'class_name', 'instructor', 'start_time', 'end_time','available_slots']
 
-    def get_start_time(self, obj):
-        return obj.start_time.astimezone(timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S %Z')
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
 
-    def get_end_time(self, obj):
-        return obj.end_time.astimezone(timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S %Z')
+        ist = pytz_timezone('Asia/Kolkata')
+        rep['start_time'] = instance.start_time.astimezone(ist).strftime('%Y-%m-%d %H:%M:%S IST')
+        rep['end_time'] = instance.end_time.astimezone(ist).strftime('%Y-%m-%d %H:%M:%S IST')
+
+        return rep
 
 
 class BookingSerializer(serializers.ModelSerializer):
