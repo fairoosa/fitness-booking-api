@@ -13,10 +13,8 @@ class BookingAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Create a ClassType (e.g., Yoga)
         self.class_type = ClassType.objects.create(class_name='Yoga')
 
-        # Create a FitnessClass starting tomorrow
         self.fitness_class = FitnessClass.objects.create(
             class_type=self.class_type,
             instructor='Jane Doe',
@@ -58,14 +56,12 @@ class BookingAPITestCase(TestCase):
 
     def test_overbooking(self):
         """Test that booking fails when no slots are available"""
-        # Book 2 slots
         for i in range(2):
             self.client.post('/book/', {
                 'class_id': self.fitness_class.id,
                 'client_name': f'User{i}',
                 'client_email': f'user{i}@example.com'
             })
-        # 3rd booking (should fail)
         response = self.client.post('/book/', {
             'class_id': self.fitness_class.id,
             'client_name': 'User3',
